@@ -1,1 +1,2 @@
-# collabr - collab text edit tool
+# collabr
+collabr is a collaborative text edit tool
