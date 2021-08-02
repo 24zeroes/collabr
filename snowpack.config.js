@@ -17,6 +17,13 @@ module.exports = {
           }
         };
 
+        const defaultWebHandler = (err, req, res) => {
+          if (err) {
+            console.error('proxy error', err)
+            finalhandler(req, res)(err)
+          }
+        }
+
         proxy.ws(
           req,
           socket,
@@ -27,8 +34,28 @@ module.exports = {
           },
           defaultWSHandler,
         );
-      },
 
+        proxy.web(
+          req, 
+          res, 
+          {
+            hostname: 'localhost',
+            port: 3000, 
+          },
+          defaultWebHandler
+        );
+      },
+    },
+    {
+      src: '/api/.*',
+      dest: (req, res) => {
+        // remove /api prefix (optional)
+        req.url = req.url.replace("api/", '');
+        return proxy.web(req, res, {
+          hostname: 'localhost',
+          port: 3000,
+        });
+      },
     },
   ],
 };

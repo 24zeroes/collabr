@@ -4,16 +4,17 @@
 
     ws.onmessage = (webSocketMessage) => {
         const messageBody = JSON.parse(webSocketMessage.data);
-        let text = 'color= ' + messageBody.color + 'key= ' + messageBody.key + ' code= ' + messageBody.code +    
-        (messageBody.shiftKey ? ' shiftKey' : '') +
+        let text = 'color=' + messageBody.color + ';key=' + messageBody.key + ';code=' + messageBody.code +    
+        (messageBody.shiftKey ? 'shiftKey' : '') +
         (messageBody.ctrlKey ? ' ctrlKey' : '') +
         (messageBody.altKey ? ' altKey' : '') +
         (messageBody.metaKey ? ' metaKey' : '') +
         (messageBody.repeat ? ' (repeat)' : '');
-    
+
         console.log(text);
     };        
     
+
     document.body.onkeypress = (evt) => {
         const messageBody = { 
             code: evt.code, 
@@ -34,6 +35,8 @@
                 if(ws.readyState === 1) {
                     clearInterval(timer);
                     resolve(ws);
+                    
+                    console.log("Connection is opened");
                 }
             }, 10);
         });   
