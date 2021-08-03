@@ -41,7 +41,7 @@ function init(sessionsStore){
           // Emulating document change
           let b = (Math.random() + 1).toString(36).substring(7);
           let position = Math.floor(Math.random() * documentText.length - 1);
-          documentText = [documentText.slice(0, position), b, documentText.slice(position)].join('');;
+          documentText = [documentText.slice(0, position), b, documentText.slice(position)].join('');
           console.log();
           console.log("documentText = " + documentText);
 
