@@ -29,55 +29,25 @@
         while(clientText != serverText)
         {
             log();
-            bindFromClient();
+            serverText = getUpdatedText(clientText, serverText);
             log();
-            bindFromServer();
+            clientText = getUpdatedText(serverText, clientText);
             log();
         }
 
-        function bindFromClient(){
-            var diff = dmp.diff_main(commonShadow, clientText, true);
+        function getUpdatedText(source, dest){
+            let diff = dmp.diff_main(commonShadow, source, true);
 
             if (diff.length > 2) {
                 dmp.diff_cleanupSemantic(diff);
             }
-            var patch_list = dmp.patch_make(commonShadow, clientText, diff);
+            const patch_list = dmp.patch_make(commonShadow, source, diff);
             
-            commonShadow = clientText;
+            commonShadow = source;
             
-            var results = dmp.patch_apply(patch_list, serverText);
+            const results = dmp.patch_apply(patch_list, dest);
 
-            serverText = results[0];
-        }
-
-        function bindFromServer(){
-            var diff = dmp.diff_main(commonShadow, serverText, true);
-
-            if (diff.length > 2) {
-                dmp.diff_cleanupSemantic(diff);
-            }
-            var patch_list = dmp.patch_make(commonShadow, serverText, diff);
-            
-            commonShadow = serverText;
-
-            var results = dmp.patch_apply(patch_list, clientText);
-
-            clientText = results[0];
-        }
-
-        function bind(source, dest){
-            var diff = dmp.diff_main(commonShadow, source, true);
-
-            if (diff.length > 2) {
-                dmp.diff_cleanupSemantic(diff);
-            }
-            var patch_list = dmp.patch_make(commonShadow, source, diff);
-            
-            commonShadow = clientText;
-            
-            var results = dmp.patch_apply(patch_list, dest);
-
-            dest = results[0];
+            return results[0];
         }
 
         function log(){
