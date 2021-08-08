@@ -112,9 +112,12 @@ function getUpdatedClientText(source){
         const clientTextResults = dmp.patch_apply(patches, clientText);
         clientText = clientTextResults[0];
         customLog("Client text after patch apply:\n" + clientText);
-
-        div.innerHTML = clientText;
-        textarea.value = clientText;
+        
+        if (clientText !== shadowCopy)
+        {
+            div.innerHTML = clientText;
+            textarea.value = clientText;
+        }
     }).catch(function(ex) {
         customLog("Error fetching /api/document/save\n" + ex, level.error);
     });
