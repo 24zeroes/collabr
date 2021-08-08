@@ -5,59 +5,69 @@ const restPort = 3000
 const dmpObj = require('../lib/diff');
 const dmpShadow = new dmpObj.diff_match_patch();
 const dmp = new dmpObj.diff_match_patch();
-var shadowCopy = "";
+var shadowCopies = {};
 var documentText = "";
 var documetName = "Important notes";
 
 function init(sessionsStore){ 
-    app.get('/session', (req, res) => { 
-        res.send('Hello World!')
+
+    app.use(express.json());
+    app.get('/session', (req, res) => {
+        const sessionId = uuidv4();
+        sessionsStore.set(sessionId, "lul");
+        const response = { id : sessionId };
+        res.send(JSON.stringify(response));
       })
       
-    app.get('/document', (req, res) => {
+    app.post('/document', (req, res) => {
+        shadowCopies[req.body.sessionId] = documentText;
+        console.log("\n shadowCopies = " + JSON.stringify(shadowCopies));
         const doc = { content : documentText, title : documetName };
         res.send(JSON.stringify(doc));
       })
 
     app.post('/document/save', (req, res) => {
-        // Gettin request body data
-        let data = '';
-        req.on('data', chunk => {
-          data += chunk;
-        })
-        req.on('end', () => { 
+      const patchText = req.body.patchText;
+      const sessionId = req.body.sessionId;
+      const patches = dmp.patch_fromText(patchText);
 
-          const patches = dmp.patch_fromText(data);
+    
+      const shadowCopyResults = dmp.patch_apply(patches, shadowCopies[sessionId]);
+      shadowCopies[sessionId] = shadowCopyResults[0];
 
-          const shadowCopyResults = dmp.patch_apply(patches, shadowCopy);
-          shadowCopy = shadowCopyResults[0];
+      const documentTextResults = dmp.patch_apply(patches, documentText);
+      documentText = documentTextResults[0];
 
-          const documentTextResults = dmp.patch_apply(patches, documentText);
-          documentText = documentTextResults[0];
+      console.log();
+      console.log("shadowCopy of " + sessionId + " = " + shadowCopies[sessionId] + "\n" + "documentText = " + documentText);
 
-          console.log();
-          console.log("shadowCopy = " + shadowCopy);
+      const diffs = { patches: getPatchesTextForClient(documentText, sessionId)};
+      res.send(JSON.stringify(diffs));
 
-          const diffs = { patches: getPatchesTextForClient(documentText)};
-          res.send(JSON.stringify(diffs));
-        })
-      })
+    });
 
-      app.listen(restPort)
+      app.listen(restPort);
 }
 
-function getPatchesTextForClient(source){
+function getPatchesTextForClient(source, sessionId){
     // On client
-    let diff = dmp.diff_main(shadowCopy, source, true);
+    let diff = dmp.diff_main(shadowCopies[sessionId], source, true);
 
     if (diff.length > 2) {
         dmp.diff_cleanupSemantic(diff);
     }
-    const patch_list = dmp.patch_make(shadowCopy, source, diff);
+    const patch_list = dmp.patch_make(shadowCopies[sessionId], source, diff);
     
-    shadowCopy = source;
+    shadowCopies[sessionId] = source;
     
     return patch_text = dmp.patch_toText(patch_list);
+}
+
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
 }
 
 module.exports.init = init;

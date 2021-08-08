@@ -2,8 +2,8 @@
 var clientText = "", shadowCopy = "";
 var dmp = new diff_match_patch();
 var typingTimer;                //timer identifier
-var doneTypingInterval = 1000;  //time in ms, 5 second for example
 var keyPressed = false;
+var sessionId = "";
 
 // Visual
 let textarea = document.getElementById("textarea");
@@ -20,14 +20,14 @@ div.oninput = (e) => {
 //on keyup, start the countdown
 div.onkeyup = (e) => {
     clearTimeout(typingTimer);
-    typingTimer = setTimeout(updateDocument, doneTypingInterval);
+    typingTimer = setTimeout(updateDocument, config.doneTypingInterval);
 };
 //on keydown, clear the countdown 
 div.onkeydown = (e) => {
     clearTimeout(typingTimer);
     keyPressed = true;
 };
-setInterval(checkOnIdle, 5000);
+setInterval(checkOnIdle, config.idleSyncInterval);
 
 function checkOnIdle (){
     customLog("CheckOnIdle");
@@ -46,18 +46,35 @@ function updateDocument () {
     getUpdatedClientText(clientText);
 }
 
-// Document init from server
-fetch("/api/document").then(function(response) {
-    return response.json();
-}).then(function(data) {
-    title.innerHTML = data.title;
-    div.innerHTML = data.content;
-    textarea.value = data.content;
-    shadowCopy = data.content;
-    clientText = data.content;
-}).catch(function() {
-    customLog("Error fetching /api/document", level.error);
+// Session & document init from server
+fetch("/api/session").then(function(sessionResponse) {
+    return sessionResponse.json();
+}).then(function(sessionData) {
+    sessionId = sessionData.id;
+    return sessionData.id;
+}).then(function(id){
+    getDocument(id);
 });
+
+function getDocument(sessionId){
+    const requestBody = { sessionId : sessionId };
+    fetch("/api/document", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body : JSON.stringify(requestBody),
+    }).then(function(response) {
+        return response.json();
+    }).then(function(data) {
+        title.innerHTML = data.title;
+        div.innerHTML = data.content;
+        textarea.value = data.content;
+        shadowCopy = data.content;
+        clientText = data.content;
+    }).catch(function(ex) {
+        customLog("Error fetching /api/document\n" + ex, level.error);
+    });
+}
+
 
 
 function getUpdatedClientText(source){
@@ -72,13 +89,15 @@ function getUpdatedClientText(source){
     shadowCopy = source;
     
     const patch_text = dmp.patch_toText(patch_list);
+    const requestBody = { patchText : patch_text, sessionId : sessionId };
     customLog("Patch to server:\n" + patch_text, );
 
     // Document init from server
     fetch("/api/document/save", 
         { 
             method: 'POST', 
-            body: patch_text
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody),
         })
     .then(function(response) {
         return response.json();
