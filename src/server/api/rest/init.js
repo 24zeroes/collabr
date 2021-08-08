@@ -2,20 +2,19 @@
 const express = require('express')
 const app = express()
 const restPort = 3000
-const dmpLul = require('../lib/diff');
-const dmp = new dmpLul.diff_match_patch();
+const dmpObj = require('../lib/diff');
+const dmpShadow = new dmpObj.diff_match_patch();
+const dmp = new dmpObj.diff_match_patch();
 var shadowCopy = "";
 var documentText = "";
 
-function init(sessionsStore){
-    app.get('/session', (req, res) => {
+function init(sessionsStore){ 
+    app.get('/session', (req, res) => { 
         res.send('Hello World!')
       })
       
     app.get('/document', (req, res) => {
-        const doc = { content : 'Hello World!'};
-        shadowCopy = 'Hello World!';
-        documentText = 'Hello World!';
+        const doc = { content : documentText};
         res.send(JSON.stringify(doc));
       })
 
@@ -37,26 +36,13 @@ function init(sessionsStore){
 
           console.log();
           console.log("shadowCopy = " + shadowCopy);
-          
-          // Emulating document change
-          let b = (Math.random() + 1).toString(36).substring(7);
-          let position = Math.floor(Math.random() * documentText.length - 1);
-          documentText = [documentText.slice(0, position), b, documentText.slice(position)].join('');
-          console.log();
-          console.log("documentText = " + documentText);
 
           const diffs = { patches: getPatchesTextForClient(documentText)};
           res.send(JSON.stringify(diffs));
         })
-
-        
-
-        
       })
 
-      app.listen(restPort, () => {
-        
-      })
+      app.listen(restPort)
 }
 
 function getPatchesTextForClient(source){
