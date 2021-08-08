@@ -3,10 +3,12 @@ var clientText = "", shadowCopy = "";
 var dmp = new diff_match_patch();
 var typingTimer;                //timer identifier
 var doneTypingInterval = 1000;  //time in ms, 5 second for example
+var keyPressed = false;
 
 // Visual
 let textarea = document.getElementById("textarea");
 let div = document.getElementById("div");
+let title = document.getElementById("documentTitle");
 textarea.hidden = true;
 div.hidden = false;
 div.contentEditable = "true";
@@ -15,22 +17,31 @@ div.contentEditable = "true";
 div.oninput = (e) => {
     textarea.value = div.innerHTML;
 };
-
 //on keyup, start the countdown
 div.onkeyup = (e) => {
     clearTimeout(typingTimer);
-    typingTimer = setTimeout(doneTyping, doneTypingInterval);
+    typingTimer = setTimeout(updateDocument, doneTypingInterval);
 };
-
 //on keydown, clear the countdown 
 div.onkeydown = (e) => {
     clearTimeout(typingTimer);
+    keyPressed = true;
 };
+setInterval(checkOnIdle, 5000);
 
+function checkOnIdle (){
+    customLog("CheckOnIdle");
+    if (keyPressed)
+    {
+        keyPressed = false;
+        return;
+    }
+    updateDocument();
+}
 
 //user is "finished typing," do something
-function doneTyping () {
-    customLog("Done typing event handling\n" + textarea.value, );
+function updateDocument () {
+    customLog("UpdateDocument event handling\n" + textarea.value, );
     clientText = textarea.value;
     getUpdatedClientText(clientText);
 }
@@ -39,6 +50,7 @@ function doneTyping () {
 fetch("/api/document").then(function(response) {
     return response.json();
 }).then(function(data) {
+    title.innerHTML = data.title;
     div.innerHTML = data.content;
     textarea.value = data.content;
     shadowCopy = data.content;
