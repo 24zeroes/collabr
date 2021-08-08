@@ -24,6 +24,7 @@ body {
     line-height: 15px;
 }
 #div {
+    display: inline-block;
     width: 600px;
     height: 800px;
     font-size: 12px;
