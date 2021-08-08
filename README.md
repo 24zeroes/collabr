@@ -1,4 +1,6 @@
 # collabr ✍🏻
+![collabr page edit screenshot](./assets/screenshot.png)
+
 Collabr is a collaborative online text edit tool, based on [diff-match-patch](https://github.com/google/diff-match-patch) library.
 
 ## Current development state
