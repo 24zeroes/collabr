@@ -7,6 +7,7 @@ const dmpShadow = new dmpObj.diff_match_patch();
 const dmp = new dmpObj.diff_match_patch();
 var shadowCopy = "";
 var documentText = "";
+var documetName = "Important notes";
 
 function init(sessionsStore){ 
     app.get('/session', (req, res) => { 
@@ -14,7 +15,7 @@ function init(sessionsStore){
       })
       
     app.get('/document', (req, res) => {
-        const doc = { content : documentText};
+        const doc = { content : documentText, title : documetName };
         res.send(JSON.stringify(doc));
       })
 
