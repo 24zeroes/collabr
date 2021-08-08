@@ -1,15 +1,41 @@
-form {
+:root {
+    --blue: #74bcdd;
+    --dark-blue: #2d3e51;
+    --red: #f74442;
+    --yellow: #fbca32;
+    --green: #5be95b;
+    --grey: #ebeced;
+  }
+
+body {
+    margin: 0;
+    padding: 10px;
+    
+    background-color: var(--grey);
+  }
+
+  form {
     margin: 20px auto;
     width: 500px;
 }
+
 #documentTitle{
     font-family: monospace;
     line-height: 15px;
 }
 #div {
-    width: 400px;
-    height: 400px;
+    width: 600px;
+    height: 800px;
     font-size: 12px;
     font-family: monospace;
     line-height: 15px;
+    margin: 0 auto;
+    padding: 30px;
+    background-color: white;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.25);
+    border-radius: 8px;
+}
+
+*:focus {
+    outline: none;
 }
