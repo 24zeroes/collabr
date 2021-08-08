@@ -110,11 +110,11 @@ function getUpdatedClientText(source){
         customLog("Shadow copy after patch apply:\n" + shadowCopy);
 
         const clientTextResults = dmp.patch_apply(patches, clientText);
-        clientText = clientTextResults[0];
-        customLog("Client text after patch apply:\n" + clientText);
         
-        if (clientText !== shadowCopy)
+        if (clientText !== clientTextResults[0])
         {
+            clientText = clientTextResults[0];
+            customLog("Client text after patch apply:\n" + clientText);
             div.innerHTML = clientText;
             textarea.value = clientText;
         }
