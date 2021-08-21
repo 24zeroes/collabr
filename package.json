@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "prestart": "cd src/server/api && npm install",
+    "prestart": "cd server/api && npm install",
     "start": "run-p dev:api dev:server",
-    "dev:api": "npm run start --prefix src/server/api",
+    "dev:api": "npm run start --prefix server/api",
     "dev:server": "npx snowpack dev --port 8081",
     "build:azure": "npx snowpack build"
   },

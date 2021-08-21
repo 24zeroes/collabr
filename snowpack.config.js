@@ -3,7 +3,8 @@ const proxy = require('http2-proxy')
 /** @type {import("snowpack").SnowpackUserConfig } */
 module.exports = {
   mount: {
-    "src/client": "/"
+    "client/public": "/",
+    "client/src": "/dist",
   },
   routes: [
     {
