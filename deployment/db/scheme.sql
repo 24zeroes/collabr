@@ -5,10 +5,10 @@ CREATE TABLE IF NOT EXISTS Users(
   passwordHash VARCHAR
 );
 
--- We can create our user table
 CREATE TABLE IF NOT EXISTS Documents(
   id SERIAL PRIMARY KEY,
   name VARCHAR,
+  maskedName VARCHAR,
   contentId VARCHAR,
   userId INTEGER REFERENCES Users(id)
 );
