@@ -3,6 +3,18 @@ const express = require('express')
 const app = express()
 const restPort = 3000
 const dmpObj = require('../lib/diff');
+
+const { Pool } = require('pg')
+const pool = new Pool({
+  user: 'admin',
+  host: 'localhost',
+  database: 'collabr',
+  password: 'admin',
+  port: 5432,
+})
+
+
+
 const dmpShadow = new dmpObj.diff_match_patch();
 const dmp = new dmpObj.diff_match_patch();
 var shadowCopies = {};
@@ -25,6 +37,19 @@ function init(sessionsStore){
         const doc = { content : documentText, title : documetName };
         res.send(JSON.stringify(doc));
       })
+
+    app.get('/documents', (req, requestRes) => {
+      let result = [];
+      pool.query({text: 'SELECT * FROM public.documents'}, [], (err, dbRes) => {
+        if (err) {
+          console.log(err.stack)
+        } else {
+          console.log(dbRes.rows)
+          requestRes.send(JSON.stringify(dbRes.rows));
+        }
+      })
+      
+    })
 
     app.post('/document/save', (req, res) => {
       const patchText = req.body.patchText;
