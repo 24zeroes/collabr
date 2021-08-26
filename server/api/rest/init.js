@@ -39,14 +39,17 @@ function init(sessionsStore){
       })
 
     app.get('/documents', (req, requestRes) => {
-      let result = [];
-      pool.query({text: 'SELECT * FROM public.documents'}, [], (err, dbRes) => {
-        if (err) {
-          console.log(err.stack)
-        } else {
-          console.log(dbRes.rows)
-          requestRes.send(JSON.stringify(dbRes.rows));
-        }
+      pool.query(
+      {
+          text: 'SELECT name, contentId, userId FROM public.documents LIMIT 5'}, 
+          [], 
+          (err, dbRes) => {
+            if (err) {
+              console.log(err.stack)
+            } else {
+              console.log(dbRes.rows)
+              requestRes.send(JSON.stringify(dbRes.rows));
+            }
       })
       
     })
