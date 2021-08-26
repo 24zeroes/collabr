@@ -1,0 +1,22 @@
+import React from 'react';
+import ReactDOM from 'react-dom';
+import {
+    BrowserRouter,
+    Switch,
+    Route,
+    Link
+  } from "react-router-dom";
+import App from './App.jsx';
+import Document from './Document/Document.jsx';
+
+ReactDOM.render(
+    <BrowserRouter>
+        <Switch>
+            <Route path="/document/:id" children={<Document />}/>
+            <Route path="/">
+                <App />
+            </Route>
+        </Switch>
+    </BrowserRouter>,
+    document.getElementById('root'),
+);
