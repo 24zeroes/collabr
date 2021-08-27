@@ -47,7 +47,6 @@ function init(sessionsStore){
             if (err) {
               console.log(err.stack)
             } else {
-              console.log(dbRes.rows)
               requestRes.send(JSON.stringify(dbRes.rows));
             }
       })
