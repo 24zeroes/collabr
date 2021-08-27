@@ -8,10 +8,12 @@ import {
   } from "react-router-dom";
 import App from './App.jsx';
 import Document from './Document/Document.jsx';
+import CreateDocument from './Document/CreateDocument.jsx';
 
 ReactDOM.render(
     <BrowserRouter>
         <Switch>
+            <Route path="/document/create" children={<CreateDocument />}/>
             <Route path="/document/:id" children={<Document />}/>
             <Route path="/">
                 <App />
