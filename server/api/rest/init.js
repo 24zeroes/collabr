@@ -5,13 +5,6 @@ const restPort = 3000
 const dmpObj = require('../lib/diff');
 
 const { Pool } = require('pg')
-const pool = new Pool({
-  user: 'admin',
-  host: 'localhost',
-  database: 'collabr',
-  password: 'admin',
-  port: 5432,
-})
 
 
 
@@ -22,6 +15,13 @@ var documentText = "";
 var documetName = "Important notes";
 
 function init(sessionsStore){ 
+    const pool = new Pool({
+      user: 'admin',
+      host: 'localhost',
+      database: 'collabr',
+      password: 'admin',
+      port: 5432,
+    });
 
     app.use(express.json());
     app.get('/session', (req, res) => {
@@ -37,11 +37,30 @@ function init(sessionsStore){
         const doc = { content : documentText, title : documetName };
         res.send(JSON.stringify(doc));
       })
+    
+    app.post('/document/create', (req, res) => {
+      const id = makeid(10);
+      pool.query(
+        {
+            text: 'WITH c AS (INSERT INTO documentcontent (content) VALUES ($1) RETURNING id) INSERT INTO documents (name, maskedname, contentid) VALUES ($2, $3, (SELECT id from c));'}, 
+            [{}, req.body.name, id], 
+            (err, dbRes) => {
+              if (err) {
+                console.log(err.stack);
+                res.status(500).send(err.stack);
+              }
+              else
+              {
+                const doc = { id: id};
+                res.send(JSON.stringify(doc));
+              }
+        });
+    })
 
     app.get('/documents', (req, requestRes) => {
       pool.query(
       {
-          text: 'SELECT name, contentId, userId FROM public.documents LIMIT 5'}, 
+          text: 'SELECT name, contentId FROM public.documents'}, 
           [], 
           (err, dbRes) => {
             if (err) {
@@ -50,7 +69,6 @@ function init(sessionsStore){
               requestRes.send(JSON.stringify(dbRes.rows));
             }
       })
-      
     })
 
     app.post('/document/save', (req, res) => {
@@ -95,6 +113,17 @@ function uuidv4() {
     var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
+}
+
+function makeid(length) {
+  var result           = '';
+  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  var charactersLength = characters.length;
+  for ( var i = 0; i < length; i++ ) {
+    result += characters.charAt(Math.floor(Math.random() * 
+charactersLength));
+ }
+ return result;
 }
 
 module.exports.init = init;

@@ -1,24 +1,33 @@
 import React from 'react';
 import { Component } from "react";
+import { Redirect } from 'react-router-dom';
 
 class CreateDocument extends Component {
   constructor(props){
     super(props);
     this.state = {
+      documentName: '',
       isControlsDisabled: false,
       documentIdToRedirect: null,
       isRedirectToCreatedDoc: false,
     };
 
     this.onCreateButtonClick = this.onCreateButtonClick.bind(this);
+    this.onDocumentNameChange = this.onDocumentNameChange.bind(this);
+  }
+
+  onDocumentNameChange(event){
+    this.setState({documentName: event.target.value})
   }
 
   onCreateButtonClick(){
     this.setState({isControlsDisabled: true});
+    const requestBody = { name: this.state.documentName};
     fetch("/api/document/create", 
     { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody)
     })
     .then(res => res.json())
     .then(doc => this.setState({documentIdToRedirect: doc.id, isRedirectToCreatedDoc: true}))
@@ -38,7 +47,7 @@ class CreateDocument extends Component {
     return (
       <div>
         <h2>New document name:</h2>
-        <input disabled={isControlsDisabled}></input>
+        <input type="text" value={this.state.value} onChange={this.onDocumentNameChange} disabled={isControlsDisabled}></input>
         <button onClick={this.onCreateButtonClick} disabled={isControlsDisabled}>Create</button>
       </div>
     );
