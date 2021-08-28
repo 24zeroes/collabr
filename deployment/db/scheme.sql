@@ -1,21 +1,11 @@
-
-CREATE TABLE IF NOT EXISTS Users(
+CREATE TABLE IF NOT EXISTS DocumentContent(
   id SERIAL PRIMARY KEY,
-  name VARCHAR,
-  passwordHash VARCHAR
+  content JSON,
 );
 
 CREATE TABLE IF NOT EXISTS Documents(
   id SERIAL PRIMARY KEY,
   name VARCHAR,
   maskedName VARCHAR,
-  contentId VARCHAR,
-  userId INTEGER REFERENCES Users(id)
+  contentId VARCHAR REFERENCES DocumentContent(id),
 );
-
-
-CREATE TABLE IF NOT EXISTS UserDocuments(
-  id SERIAL PRIMARY KEY,
-  userId INTEGER REFERENCES Users(id),
-  documentId INTEGER REFERENCES Documents(id)
-)
