@@ -6,7 +6,13 @@ const restPort = config.get('api.port');
 const dmpObj = require('../lib/diff');
 
 const { Pool } = require('pg')
-
+const pool = new Pool({
+  user: config.get('pgDb.user'),
+  host: config.get('pgDb.host'),
+  database: config.get('pgDb.database'),
+  password: config.get('pgDb.password'),
+  port: config.get('pgDb.port'),
+});
 
 
 const dmpShadow = new dmpObj.diff_match_patch();
@@ -16,13 +22,7 @@ var documentText = "";
 var documetName = "Important notes";
 
 function init(sessionsStore){ 
-    const pool = new Pool({
-      user: config.get('pgDb.user'),
-      host: config.get('pgDb.host'),
-      database: config.get('pgDb.database'),
-      password: config.get('pgDb.password'),
-      port: config.get('pgDb.port'),
-    });
+
 
     app.use(express.json());
     app.get('/session', (req, res) => {
@@ -39,38 +39,36 @@ function init(sessionsStore){
         res.send(JSON.stringify(doc));
       })
     
-    app.post('/document/create', (req, res) => {
+    app.post('/document/create', asyncUtil(async (request, response, next) => {
       const id = makeid(10);
-      pool.query(
-        {
-            text: 'WITH c AS (INSERT INTO documentcontent (content) VALUES ($1) RETURNING id) INSERT INTO documents (name, maskedname, contentid) VALUES ($2, $3, (SELECT id from c));'}, 
-            [{}, req.body.name, id], 
-            (err, dbRes) => {
-              if (err) {
-                console.log(err.stack);
-                res.status(500).send(err.stack);
-              }
-              else
-              {
-                const doc = { id: id};
-                res.send(JSON.stringify(doc));
-              }
-        });
-    })
+      const client = await pool.connect();
+      try {
+        const dbRes = await client.query(
+          'WITH c AS (INSERT INTO documentcontent (content) VALUES ($1) RETURNING id) INSERT INTO documents (name, maskedname, contentid) VALUES ($2, $3, (SELECT id from c));', 
+          [{}, request.body.name, id],
+        );
+        response.send(JSON.stringify({id: id}));
+      } catch(err) {
+        console.log(err.stack);
+        response.status(500).send(err.stack);
+      } 
+      finally {
+        client.release()
+      }
+    }))
 
-    app.get('/documents', (req, requestRes) => {
-      pool.query(
-      {
-          text: 'SELECT name, contentId FROM public.documents'}, 
-          [], 
-          (err, dbRes) => {
-            if (err) {
-              console.log(err.stack)
-            } else {
-              requestRes.send(JSON.stringify(dbRes.rows));
-            }
-      })
-    })
+    app.get('/documents', asyncUtil(async (request, response, next) => {
+      const client = await pool.connect();
+      try {
+        const dbRes = await client.query(
+          'SELECT name, contentId FROM public.documents', 
+          []
+        );
+        response.send(JSON.stringify(dbRes.rows));
+      } finally {
+        client.release()
+      }
+    }))
 
     app.post('/document/save', (req, res) => {
       const patchText = req.body.patchText;
@@ -124,6 +122,13 @@ function makeid(length) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return result;
+}
+
+const asyncUtil = fn =>
+function asyncUtilWrap(...args) {
+  const fnReturn = fn(...args)
+  const next = args[args.length-1]
+  return Promise.resolve(fnReturn).catch(next)
 }
 
 module.exports.init = init;
