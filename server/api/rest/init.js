@@ -1,7 +1,8 @@
 // RestApi setup
 const express = require('express')
 const app = express()
-const restPort = 3000
+const config = require('config');
+const restPort = config.get('api.port');
 const dmpObj = require('../lib/diff');
 
 const { Pool } = require('pg')
@@ -16,11 +17,11 @@ var documetName = "Important notes";
 
 function init(sessionsStore){ 
     const pool = new Pool({
-      user: 'admin',
-      host: 'localhost',
-      database: 'collabr',
-      password: 'admin',
-      port: 5432,
+      user: config.get('pgDb.user'),
+      host: config.get('pgDb.host'),
+      database: config.get('pgDb.database'),
+      password: config.get('pgDb.password'),
+      port: config.get('pgDb.port'),
     });
 
     app.use(express.json());
@@ -120,10 +121,9 @@ function makeid(length) {
   var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   var charactersLength = characters.length;
   for ( var i = 0; i < length; i++ ) {
-    result += characters.charAt(Math.floor(Math.random() * 
-charactersLength));
- }
- return result;
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
 }
 
 module.exports.init = init;

@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "config": "^3.3.6",
     "express": "^4.17.1",
     "pg": "latest",
     "ws": "^7.5.0"

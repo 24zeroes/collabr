@@ -1,0 +1,12 @@
+{
+    "api":{
+        "port": 3000
+    },
+    "pgDb":{
+        "user": "admin",
+        "host": "localhost",
+        "database": "collabr",
+        "password": "admin",
+        "port": 5432
+    }
+}
