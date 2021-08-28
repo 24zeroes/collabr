@@ -1,10 +1,6 @@
-// RestApi setup
-const express = require('express')
-const app = express()
-const config = require('config');
-const restPort = config.get('api.port');
+
 const dmpObj = require('../lib/diff');
-const { getDocuments, createDocument } = require('../handlers/document/index');
+
 
 const dmpShadow = new dmpObj.diff_match_patch();
 const dmp = new dmpObj.diff_match_patch();
@@ -29,10 +25,6 @@ function init(sessionsStore){
         const doc = { content : documentText, title : documetName };
         res.send(JSON.stringify(doc));
       })
-    
-    app.post('/document/create', ((request, response, next) => asyncUtil(createDocument(request, response, next))))
-
-    app.get('/documents', ((request, response, next) => asyncUtil(getDocuments(request, response, next))))
 
     app.post('/document/save', (req, res) => {
       const patchText = req.body.patchText;
@@ -54,7 +46,7 @@ function init(sessionsStore){
 
     });
 
-      app.listen(restPort);
+      
 }
 
 function getPatchesTextForClient(source, sessionId){
@@ -76,13 +68,6 @@ function uuidv4() {
     var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
-}
-
-const asyncUtil = fn =>
-function asyncUtilWrap(...args) {
-  const fnReturn = fn(...args)
-  const next = args[args.length-1]
-  return Promise.resolve(fnReturn).catch(next)
 }
 
 module.exports.init = init;
