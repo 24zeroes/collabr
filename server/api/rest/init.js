@@ -4,17 +4,7 @@ const app = express()
 const config = require('config');
 const restPort = config.get('api.port');
 const dmpObj = require('../lib/diff');
-
-const { Pool } = require('pg')
-const { getDocuments } = require('../handlers/document/index');
-const pool = new Pool({
-  user: config.get('pgDb.user'),
-  host: config.get('pgDb.host'),
-  database: config.get('pgDb.database'),
-  password: config.get('pgDb.password'),
-  port: config.get('pgDb.port'),
-});
-
+const { getDocuments, createDocument } = require('../handlers/document/index');
 
 const dmpShadow = new dmpObj.diff_match_patch();
 const dmp = new dmpObj.diff_match_patch();
@@ -40,28 +30,9 @@ function init(sessionsStore){
         res.send(JSON.stringify(doc));
       })
     
-    app.post('/document/create', asyncUtil(async (request, response, next) => {
-      const id = makeid(10);
-      const client = await pool.connect();
-      try {
-        await client.query('BEGIN');
-        const dbRes = await client.query(
-          'WITH c AS (INSERT INTO documentcontent (content) VALUES ($1) RETURNING id) INSERT INTO documents (name, maskedname, contentid) VALUES ($2, $3, (SELECT id from c));', 
-          [{}, request.body.name, id],
-        );
-        await client.query('COMMIT');
-        response.send(JSON.stringify({id: id}));
-      } catch(err) {
-        console.log(err.stack);
-        await client.query('ROLLBACK');
-        response.status(500).send(err.stack);
-      } 
-      finally {
-        client.release()
-      }
-    }))
+    app.post('/document/create', ((request, response, next) => asyncUtil(createDocument(request, response, next))))
 
-    app.get('/documents', ((req, res, next) => asyncUtil(getDocuments(req, res, next))))
+    app.get('/documents', ((request, response, next) => asyncUtil(getDocuments(request, response, next))))
 
     app.post('/document/save', (req, res) => {
       const patchText = req.body.patchText;
@@ -105,16 +76,6 @@ function uuidv4() {
     var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
     return v.toString(16);
   });
-}
-
-function makeid(length) {
-  var result           = '';
-  var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  var charactersLength = characters.length;
-  for ( var i = 0; i < length; i++ ) {
-    result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
 }
 
 const asyncUtil = fn =>
