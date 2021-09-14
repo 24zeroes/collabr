@@ -7,7 +7,7 @@ async function getDocument(request, response, next){
     const client = await db.getClient();
     try {
         const dbRes = await client.query(query, params);
-        response.send(JSON.stringify(dbRes.rows));
+        response.send(JSON.stringify({title: dbRes.rows[0].name, content: dbRes.rows[0].content}));
     } finally {
         client.release()
     }

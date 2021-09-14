@@ -12,6 +12,13 @@ class EditDocument extends Component
         this.state = {
           sessionId: undefined,
           id: props.match.params.id,
+          textarea: {
+            isHidden: true,
+          },
+          div: {
+            isHidden: false,
+            isContentEditable: true,
+          },
           document: {
             title: undefined,
             content: undefined,
@@ -35,7 +42,9 @@ class EditDocument extends Component
         })
         .then(res => res.json());
 
-        this.setState({document: { title: doc.name, content: doc.content, state: 'OK' }});
+        this.setState({document: { title: doc.title, content: doc.content, state: 'OK' }});
+        console.log(doc);
+        console.log(this.state);
     }
 
   render() {
@@ -45,7 +54,13 @@ class EditDocument extends Component
       return(<h1>Loading...</h1>);
     }
 
-    return(<h2>Edit document with id {this.state.id}</h2>);
+    return(
+      <form className="documentForm">
+        <h3 className="documentTitle">{this.state.document.title}</h3>
+        <textarea hidden={this.state.textarea.isHidden}></textarea>
+        <span className="div" spellCheck="false" hidden={this.state.div.isHidden} contentEditable="true"></span>
+      </form>
+    );
   }
   
 }
