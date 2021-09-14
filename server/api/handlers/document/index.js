@@ -1,7 +1,20 @@
 const db = require('../../dataAccess');
 
+async function getDocument(request, response, next){
+    const query = 'select name, content from documents as d join documentcontent as dc on dc.id = d.contentid where maskedname = $1';
+    const params = [request.body.docId];
+    
+    const client = await db.getClient();
+    try {
+        const dbRes = await client.query(query, params);
+        response.send(JSON.stringify(dbRes.rows));
+    } finally {
+        client.release()
+    }
+}
+
 async function getDocuments(request, response, next){
-    const query = 'SELECT name, contentId FROM public.documents';
+    const query = 'SELECT name, maskedName FROM public.documents';
     const client = await db.getClient();
     try {
         const dbRes = await client.query(query, []);
@@ -15,7 +28,7 @@ async function createDocument(request, response, next){
     const id = makeid(10);
 
     const query = 'WITH c AS (INSERT INTO documentcontent (content) VALUES ($1) RETURNING id) INSERT INTO documents (name, maskedname, contentid) VALUES ($2, $3, (SELECT id from c));';
-    const params = [{}, request.body.name, id];
+    const params = [{text: ''}, request.body.name, id];
 
     const client = await db.getClient();
     try {
@@ -45,5 +58,6 @@ function makeid(length) {
 
 module.exports = {
     getDocuments,
-    createDocument
+    createDocument,
+    getDocument,
 };

@@ -18,13 +18,7 @@ function init(sessionsStore){
         const response = { id : sessionId };
         res.send(JSON.stringify(response));
       })
-      
-    app.post('/document', (req, res) => {
-        shadowCopies[req.body.sessionId] = documentText;
-        console.log("\n shadowCopies = " + JSON.stringify(shadowCopies));
-        const doc = { content : documentText, title : documetName };
-        res.send(JSON.stringify(doc));
-      })
+    
 
     app.post('/document/save', (req, res) => {
       const patchText = req.body.patchText;

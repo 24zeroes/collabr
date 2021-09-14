@@ -40,7 +40,7 @@ class App extends Component
       <h1>Document list:</h1>
       <ul>
         {this.state.docList.map((doc) => {
-          return <li key={doc.contentid}><Link to={`/document/${doc.contentid}`} >{doc.name}</Link></li>
+          return <li key={doc.maskedname}><Link to={`/document/${doc.maskedname}/edit`} >{doc.name}</Link></li>
         })}
       </ul>
       <Link to={"/document/create"}>Create new document</Link>
