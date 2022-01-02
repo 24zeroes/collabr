@@ -110,7 +110,7 @@ function getPatchesTextForClient(source, sessionId){
     
     shadowsStore[sessionId] = source;
     
-    return patch_text = dmp.patch_toText(patch_list);
+    return dmp.patch_toText(patch_list);
 }
 
 function makeid(length) {

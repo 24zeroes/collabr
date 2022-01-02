@@ -33,6 +33,9 @@ class EditDocument extends Component
     }
 
     async updateDocument(){
+      console.log("Update document called");
+      console.log("Shadow copy: " + this.state.shadowCopy.content);
+      console.log("Client text: : " + this.state.textarea.value);
       let dmp = this.state.diffMatchPatch;
       let diff = dmp.diff_main(
         this.state.shadowCopy.content, 
@@ -48,6 +51,8 @@ class EditDocument extends Component
         this.state.shadowCopy.content,  
         this.state.textarea.value, 
         diff);
+
+      this.setState({shadowCopy: {content: this.state.textarea.value}});
       
       const patch_text = dmp.patch_toText(patch_list);
       const requestBody = { patchText : patch_text, sessionId : this.state.sessionId, docId: this.state.id };
@@ -62,8 +67,11 @@ class EditDocument extends Component
       })
       .then(response => response.json());
 
+      console.log("Patches from server :" + data.patches);
       const patches = dmp.patch_fromText(data.patches);
+      console.log("Patches at first :" + patches);
       const shadowCopyResults = dmp.patch_apply(patches, this.state.shadowCopy.content);
+      console.log("Patches after shadowCopyResults:" + patches);
 
       this.setState({shadowCopy: {content: shadowCopyResults[0]}});
 
