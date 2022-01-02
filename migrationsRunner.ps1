@@ -1,0 +1,1 @@
+docker exec -ti collabr_pg_db_1 psql -U admin -d collabr -f var/migrations/001.sql

@@ -13,6 +13,7 @@ services:
       - POSTGRES_DB=collabr
     volumes:
       - pg_project:/var/lib/postgresql/data
+      - ./server/migrations:/var/migrations
     ports:
       - "5432:5432"
     networks:
