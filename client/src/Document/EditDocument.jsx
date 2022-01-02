@@ -63,7 +63,7 @@ class EditDocument extends Component
       .then(response => response.json());
 
       const patches = dmp.patch_fromText(data.patches);
-      const shadowCopyResults = dmp.patch_apply(patches, shadowCopy);
+      const shadowCopyResults = dmp.patch_apply(patches, this.state.shadowCopy.content);
 
       this.setState({shadowCopy: {content: shadowCopyResults[0]}});
 
