@@ -23,19 +23,34 @@ class EditDocument extends Component
             title: undefined,
             state: undefined,
           },
+          doneTypingTimer: undefined,
+          idleTimer: undefined,
         };
         this.onChangeContent = this.onChangeContent.bind(this);
         this.updateDocument = this.updateDocument.bind(this);
+        this.onKeyUpOnText = this.onKeyUpOnText.bind(this);
+        this.onKeyDownOnText = this.onKeyDownOnText.bind(this);
     }
 
     onChangeContent(event){
       this.setState({textarea:{ value: event.target.value }});
     }
 
+    async onKeyUpOnText(){
+      clearTimeout(this.state.doneTypingTimer);
+      this.state.doneTypingTimer = setTimeout(this.updateDocument, 1000);
+      this.state.idleTimer = setTimeout(this.updateDocument, 5000);
+    }
+    
+    onKeyDownOnText(){
+      clearTimeout(this.state.doneTypingTimer);
+    }
+
     async updateDocument(){
       console.log("Update document called");
       console.log("Shadow copy: " + this.state.shadowCopy.content);
       console.log("Client text: : " + this.state.textarea.value);
+      clearTimeout(this.state.idleTimer);
       let dmp = this.state.diffMatchPatch;
       let diff = dmp.diff_main(
         this.state.shadowCopy.content, 
@@ -82,6 +97,7 @@ class EditDocument extends Component
       {
           this.setState({textarea: {value: clientTextResults[0]}});
       }
+      this.state.idleTimer = setTimeout(this.updateDocument, 5000);
     }
 
     async componentDidMount(){
@@ -107,6 +123,8 @@ class EditDocument extends Component
           content: doc.content,
         }
       });
+
+      this.state.idleTimer = setTimeout(this.updateDocument, 5000);
     }
 
     async setSession(){
@@ -140,11 +158,13 @@ class EditDocument extends Component
     return(
       <div className="documentForm">
         <h3 className="documentTitle">{this.state.document.title}</h3>
-        <button onClick={this.updateDocument}>Update document</button>
+        
         <textarea 
           className="documentContent" 
           value={this.state.textarea.value} 
           onChange={this.onChangeContent}  
+          onKeyUp={this.onKeyUpOnText}
+          onKeyDown={this.onKeyDownOnText}
         />
       </div>
     );
