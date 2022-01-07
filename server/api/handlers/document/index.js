@@ -1,4 +1,5 @@
-const db = require('../../dataAccess');
+const db = require('../../dataAccess/pg');
+const mongo = require('../../dataAccess/mongo');
 const dmpObj = require('../../lib/diff');
 const dmp = new dmpObj.diff_match_patch();
 var sessionsStore = new Map();
@@ -19,14 +20,8 @@ async function getDocument(request, response, next){
 }
 
 async function getDocuments(request, response, next){
-    const query = 'SELECT name, maskedName FROM public.documents';
-    const client = await db.getClient();
-    try {
-        const dbRes = await client.query(query, []);
-        response.send(JSON.stringify(dbRes.rows));
-    } finally {
-        client.release()
-    }
+    let res = await mongo.getDocuments();
+    response.send(JSON.stringify(res));
 }
 
 async function createDocument(request, response, next){

@@ -1,8 +1,6 @@
 import React from 'react';
 import { Component } from "react";
 import { Link, Redirect } from 'react-router-dom';
-import BlockUi from 'react-block-ui';
-import 'react-block-ui/style.css';
 
 class App extends Component
 {
