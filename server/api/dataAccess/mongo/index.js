@@ -9,7 +9,7 @@ const docScheme = new Schema({
 });
 
 mongoose.connect(`mongodb://${config.get('mongoDb.host')}:${config.get('mongoDb.port')}/${config.get('mongoDb.docsDbName')}`, 
-{ user: "accountAdmin01", pass: "admin", keepAlive: true, keepAliveInitialDelay: 300000 });
+{ user: config.get('mongoDb.user'), pass: config.get('mongoDb.pass'), keepAlive: true, keepAliveInitialDelay: 300000 });
 
 const Doc = mongoose.model("Doc", docScheme);
 

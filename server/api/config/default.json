@@ -12,8 +12,8 @@
     "mongoDb":{
         "host": "localhost",
         "port": "27017",
-        "docsDbName": "docs",
-        "user": "accountAdmin01",
-        "pass": "admin"
+        "docsDbName": "collabr",
+        "user": "collabrApp",
+        "pass": "collabrAppPass"
     }
 }
