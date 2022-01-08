@@ -24,7 +24,6 @@ class EditDocument extends Component
             state: undefined,
           },
           doneTypingTimer: undefined,
-          idleTimer: undefined,
         };
         this.onChangeContent = this.onChangeContent.bind(this);
         this.updateDocument = this.updateDocument.bind(this);
@@ -39,7 +38,6 @@ class EditDocument extends Component
     async onKeyUpOnText(){
       clearTimeout(this.state.doneTypingTimer);
       this.state.doneTypingTimer = setTimeout(this.updateDocument, 1000);
-      this.state.idleTimer = setTimeout(this.updateDocument, 5000);
     }
     
     onKeyDownOnText(){
@@ -50,7 +48,6 @@ class EditDocument extends Component
       console.log("Update document called");
       console.log("Shadow copy: " + this.state.shadowCopy.content);
       console.log("Client text: : " + this.state.textarea.value);
-      clearTimeout(this.state.idleTimer);
       let dmp = this.state.diffMatchPatch;
       let diff = dmp.diff_main(
         this.state.shadowCopy.content, 
@@ -97,7 +94,6 @@ class EditDocument extends Component
       {
           this.setState({textarea: {value: clientTextResults[0]}});
       }
-      this.state.idleTimer = setTimeout(this.updateDocument, 5000);
     }
 
     async componentDidMount(){
@@ -123,8 +119,6 @@ class EditDocument extends Component
           content: doc.text,
         }
       });
-
-      this.state.idleTimer = setTimeout(this.updateDocument, 5000);
     }
 
     async setSession(){
