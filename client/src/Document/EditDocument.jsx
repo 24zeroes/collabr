@@ -114,13 +114,13 @@ class EditDocument extends Component
 
       this.setState({
         textarea:{
-          value: doc.content,
+          value: doc.text,
         },
         document: { 
           title: doc.title, 
           state: 'OK' },
         shadowCopy:{
-          content: doc.content,
+          content: doc.text,
         }
       });
 
@@ -158,7 +158,6 @@ class EditDocument extends Component
     return(
       <div className="documentForm">
         <h3 className="documentTitle">{this.state.document.title}</h3>
-        
         <textarea 
           className="documentContent" 
           value={this.state.textarea.value} 

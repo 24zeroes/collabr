@@ -8,14 +8,33 @@ const docScheme = new Schema({
     key: String
 });
 
+mongoose.connect(`mongodb://${config.get('mongoDb.host')}:${config.get('mongoDb.port')}/${config.get('mongoDb.docsDbName')}`, 
+{ user: "accountAdmin01", pass: "admin", keepAlive: true, keepAliveInitialDelay: 300000 });
+
+const Doc = mongoose.model("Doc", docScheme);
 
 module.exports = {
     async getDocuments(){
-        await mongoose.connect(`mongodb://${config.get('mongoDb.host')}:${config.get('mongoDb.port')}/${config.get('mongoDb.docsDbName')}`, 
-                                { user: "accountAdmin01", pass: "admin", keepAlive: true, keepAliveInitialDelay: 300000 });
-        const Doc = mongoose.model("Doc", docScheme);
+
         const docs = await Doc.find({});
         return docs;
+    },
+
+    async getDocument(key){
+        let doc = await Doc.findOne({key: key});
+        doc.content = doc.content ? doc.content : '';
+        return doc;
+    },
+
+    async createDocument(name, key){
+
+        let newDoc = new Doc({ title: name, key: key, content: ''});
+        newDoc = await newDoc.save();
+
+    },
+
+    async updateDocument(doc){
+        await doc.updateOne({content: doc.content});
     }
 
 }

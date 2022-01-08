@@ -2,21 +2,21 @@ const db = require('../../dataAccess/pg');
 const mongo = require('../../dataAccess/mongo');
 const dmpObj = require('../../lib/diff');
 const dmp = new dmpObj.diff_match_patch();
-var sessionsStore = new Map();
-var shadowsStore = new Map();
+var sessionsStore = {};
+var shadowsStore = {};
 
 async function getDocument(request, response, next){
-    const query = 'select name, content from documents as d join documentcontent as dc on dc.id = d.contentid where maskedname = $1';
-    const params = [request.body.docId];
-    
-    const client = await db.getClient();
+
     try {
-        const dbRes = await client.query(query, params);
-        shadowsStore.set(request.body.sessionId, dbRes.rows[0].content.text);
-        response.send(JSON.stringify({title: dbRes.rows[0].name, content: dbRes.rows[0].content.text}));
-    } finally {
-        client.release()
-    }
+        let res = await mongo.getDocument(request.body.docId);
+        
+        let responseText = res.content !== undefined ? res.content : '';
+        shadowsStore[request.body.sessionId] = responseText;
+        response.send(JSON.stringify({title: res.title, text: responseText}));
+    } catch(err) {
+        console.log(err.stack);
+        response.status(500).send(err.stack);
+    } 
 }
 
 async function getDocuments(request, response, next){
@@ -27,75 +27,46 @@ async function getDocuments(request, response, next){
 async function createDocument(request, response, next){
     const id = makeid(10);
 
-    const query = 'WITH c AS (INSERT INTO documentcontent (content) VALUES ($1) RETURNING id) INSERT INTO documents (name, maskedname, contentid) VALUES ($2, $3, (SELECT id from c));';
-    const params = [{text: ''}, request.body.name, id];
-
-    const client = await db.getClient();
     try {
-        await client.query('BEGIN');
-        const dbRes = await client.query(query, params);
-        await client.query('COMMIT');
+        let res = await mongo.createDocument(request.body.name, id);
         response.send(JSON.stringify({id: id}));
     } catch(err) {
         console.log(err.stack);
-        await client.query('ROLLBACK');
         response.status(500).send(err.stack);
     } 
-    finally {
-        client.release()
-    }
 }
 
 async function saveDocument(request, response, next){
+    
     const patchText = request.body.patchText;
     const sessionId = request.body.sessionId;
     const patches = dmp.patch_fromText(patchText);
-  
+    
+    console.log(shadowsStore);
     const shadowCopyResults = dmp.patch_apply(patches, shadowsStore[sessionId]);
+    console.log('shadowCopyResults ' +  shadowCopyResults);
     shadowsStore[sessionId] = shadowCopyResults[0];
 
-    const query = 'select content from documents as d join documentcontent as dc on dc.id = d.contentid where maskedname = $1';
-    const params = [request.body.docId];
-    let documentText = undefined;
-    const client = await db.getClient();
-
-    const dbRes = await client.query(query, params);
-    documentText = dbRes.rows[0].content.text;
+    let doc = await mongo.getDocument(request.body.docId);
+    documentText = doc.content;
 
 
     const documentTextResults = dmp.patch_apply(patches, documentText);
     documentText = documentTextResults[0];
-
-    const updateQuery = 'update documentcontent set content = $1 where id = (select contentid from documents where maskedname = $2)';
-    const updateParams = [{text: documentText}, request.body.docId];
+    doc.content = documentText;
 
     try {
-        await client.query('BEGIN');
-        const dbRes = await client.query(updateQuery, updateParams);
-        await client.query('COMMIT');
+        await mongo.updateDocument(doc);
     } catch(err) {
         console.log(err.stack);
-        await client.query('ROLLBACK');
         response.status(500).send(err.stack);
     } 
-    finally {
-        client.release()
-    }
-
     const diffs = { patches: getPatchesTextForClient(documentText, sessionId)};
     response.send(JSON.stringify(diffs));
 }
 
-async function getSession(request, response, next){
-    const sessionId = uuidv4();
-    sessionsStore.set(sessionId, "lul");
-    const payload = { id : sessionId };
-    response.send(JSON.stringify(payload));
-}
-
 
 function getPatchesTextForClient(source, sessionId){
-    // On client
     let diff = dmp.diff_main(shadowsStore[sessionId], source, true);
 
     if (diff.length > 2) {
@@ -104,7 +75,7 @@ function getPatchesTextForClient(source, sessionId){
     const patch_list = dmp.patch_make(shadowsStore[sessionId], source, diff);
     
     shadowsStore[sessionId] = source;
-    
+
     return dmp.patch_toText(patch_list);
 }
 
@@ -118,6 +89,13 @@ function makeid(length) {
     return result;
 }
 
+async function getSession(request, response, next){
+    const sessionId = uuidv4();
+    sessionsStore[sessionId] = true;
+    const payload = { id : sessionId };
+    response.send(JSON.stringify(payload));
+}
+
 function uuidv4() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
       var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -129,6 +107,6 @@ module.exports = {
     getDocuments,
     createDocument,
     getDocument,
-    getSession,
     saveDocument,
+    getSession,
 };
