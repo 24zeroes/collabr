@@ -3,7 +3,7 @@ import { Component } from "react";
 import {
   diff_match_patch
 } from "../../public/dmp.js";
-
+import ContentEditable from 'react-contenteditable';
 
 class EditDocument extends Component
 {
@@ -25,6 +25,7 @@ class EditDocument extends Component
           },
           doneTypingTimer: undefined,
         };
+        this.contentEditable = React.createRef();
         this.onChangeContent = this.onChangeContent.bind(this);
         this.updateDocument = this.updateDocument.bind(this);
         this.onKeyUpOnText = this.onKeyUpOnText.bind(this);
@@ -152,9 +153,10 @@ class EditDocument extends Component
     return(
       <div className="documentForm">
         <h3 className="documentTitle">{this.state.document.title}</h3>
-        <textarea 
+        <ContentEditable 
+          innerRef={this.contentEditable}
           className="documentContent" 
-          value={this.state.textarea.value} 
+          html={this.state.textarea.value} 
           onChange={this.onChangeContent}  
           onKeyUp={this.onKeyUpOnText}
           onKeyDown={this.onKeyDownOnText}
