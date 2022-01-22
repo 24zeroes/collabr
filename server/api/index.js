@@ -1,4 +1,5 @@
-// RestApi setup
+#!/usr/bin/env nodejs
+
 const express = require('express')
 const app = express()
 const config = require('config');

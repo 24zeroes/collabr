@@ -1,10 +1,18 @@
-const proxy = require('http2-proxy')
+const proxy = require('http2-proxy');
+const dotenv = require('dotenv-webpack');
 
 module.exports = {
   mount: {
     "client/public": "/",
     "client/src": "/dist/",
   },
+  plugins: [
+    [
+      '@snowpack/plugin-webpack',
+      {
+      },
+    ],
+  ],
   routes: [
     {
       match: 'all',
