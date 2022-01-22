@@ -152,7 +152,25 @@ class EditDocument extends Component
 
     return(
       <div className="documentForm">
-        <h3 className="documentTitle">{this.state.document.title}</h3>
+        <div className="documentTitle">
+          <h1>{this.state.document.title}</h1>
+        </div>
+        
+        <div className="styleBar">
+          <EditButton cmd="undo" name="Undo" />
+          <EditButton cmd="redo" name="Redo" />
+          <EditButton cmd="bold" name="Bold" />
+          <EditButton cmd="italic" name="Italic" />
+          <EditButton cmd="underline" name="Underline" />
+          <EditButton cmd="justifyLeft" name="JustifyLeft" />
+          <EditButton cmd="justifyCenter" name="JustifyCenter" />
+          <EditButton cmd="justifyRight" name="JustifyRight" />
+          <EditButton cmd="justifyFull" name="JustifyFull" />
+          <EditButton cmd="insertUnorderedList" name="List" />
+          <EditButton cmd="removeFormat" name="Remove format" />
+          <EditButton cmd="formatBlock" arg="h1" name="Heading" />
+        </div>
+
         <ContentEditable 
           innerRef={this.contentEditable}
           className="documentContent" 
@@ -161,10 +179,26 @@ class EditDocument extends Component
           onKeyUp={this.onKeyUpOnText}
           onKeyDown={this.onKeyDownOnText}
         />
+
       </div>
     );
   }
   
+}
+
+function EditButton(props) {
+  return (
+    <button
+    className='styleButton'
+      key={props.cmd}
+      onMouseDown={evt => {
+        evt.preventDefault(); // Avoids loosing focus from the editable area
+        document.execCommand(props.cmd, false, props.arg); // Send the command to the browser
+      }}
+    >
+      {props.name || props.cmd}
+    </button>
+  );
 }
 
 export default EditDocument;
