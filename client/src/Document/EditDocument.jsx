@@ -178,6 +178,7 @@ class EditDocument extends Component
           onChange={this.onChangeContent}  
           onKeyUp={this.onKeyUpOnText}
           onKeyDown={this.onKeyDownOnText}
+          spellCheck={false}
         />
 
       </div>
