@@ -4,7 +4,19 @@ import {
   diff_match_patch
 } from "../../public/dmp.js";
 import ContentEditable from 'react-contenteditable';
-
+import StyleButton from './StyleButtons/StyleButtonBase.jsx';
+import UndoButtonIcon from './StyleButtons/UndoButtonIcon.jsx';
+import RedoButtonIcon from './StyleButtons/RedoButtonIcon.jsx';
+import BoldButtonIcon from './StyleButtons/BoldButtonIcon.jsx';
+import ItalicButtonIcon from './StyleButtons/ItalicButtonIcon.jsx';
+import UnderlineButtonIcon from './StyleButtons/UnderlineButtonIcon.jsx';
+import AlignLeftButtonIcon from './StyleButtons/AlignLeftButtonIcon.jsx';
+import AlignCenterButtonIcon from './StyleButtons/AlignCenterButtonIcon.jsx';
+import AlignRightButtonIcon from './StyleButtons/AlignRightButtonIcon.jsx';
+import AlignFullButtonIcon from './StyleButtons/AlignFullButtonIcon.jsx';
+import BulletListButtonIcon from './StyleButtons/BulletListButtonIcon.jsx';
+import RemoveFormatButtonIcon from './StyleButtons/RemoveFormatButtonIcon.jsx';
+import HeadingButtonIcon from './StyleButtons/HeadingButtonIcon.jsx';
 class EditDocument extends Component
 {
     constructor(props){
@@ -157,18 +169,36 @@ class EditDocument extends Component
         </div>
         
         <div className="styleBar">
-          <EditButton cmd="undo" name="Undo" />
-          <EditButton cmd="redo" name="Redo" />
-          <EditButton cmd="bold" name="Bold" />
-          <EditButton cmd="italic" name="Italic" />
-          <EditButton cmd="underline" name="Underline" />
-          <EditButton cmd="justifyLeft" name="JustifyLeft" />
-          <EditButton cmd="justifyCenter" name="JustifyCenter" />
-          <EditButton cmd="justifyRight" name="JustifyRight" />
-          <EditButton cmd="justifyFull" name="JustifyFull" />
-          <EditButton cmd="insertUnorderedList" name="List" />
-          <EditButton cmd="removeFormat" name="Remove format" />
-          <EditButton cmd="formatBlock" arg="h1" name="Heading" />
+          <span className="styleButtonGroup">
+            <StyleButton cmd="undo" icon={<UndoButtonIcon/>} />
+            <StyleButton cmd="redo" icon={<RedoButtonIcon/>} />
+          </span>
+          
+          <span className="styleButtonGroup">
+            <StyleButton cmd="bold" icon={<BoldButtonIcon/>} />
+            <StyleButton cmd="italic" icon={<ItalicButtonIcon/>} />
+            <StyleButton cmd="underline" icon={<UnderlineButtonIcon/>} />
+          </span>
+
+          <span className="styleButtonGroup">
+            <StyleButton cmd="justifyLeft" icon={<AlignLeftButtonIcon/>} />
+            <StyleButton cmd="justifyCenter" icon={<AlignCenterButtonIcon/>} />
+            <StyleButton cmd="justifyRight" icon={<AlignRightButtonIcon/>} />
+            <StyleButton cmd="justifyFull" icon={<AlignFullButtonIcon/>} />
+          </span>
+          
+          <span className="styleButtonGroup">
+            <StyleButton cmd="insertUnorderedList" icon={<BulletListButtonIcon/>} />
+          </span>
+          
+          <span className="styleButtonGroup">
+            <StyleButton cmd="removeFormat" icon={<RemoveFormatButtonIcon/>} />
+          </span>
+          
+          <span className="styleButtonGroup">
+            <StyleButton cmd="formatBlock" arg="h1" icon={<HeadingButtonIcon/>} />
+          </span>
+          
         </div>
 
         <ContentEditable 
@@ -185,21 +215,6 @@ class EditDocument extends Component
     );
   }
   
-}
-
-function EditButton(props) {
-  return (
-    <button
-    className='styleButton'
-      key={props.cmd}
-      onMouseDown={evt => {
-        evt.preventDefault(); // Avoids loosing focus from the editable area
-        document.execCommand(props.cmd, false, props.arg); // Send the command to the browser
-      }}
-    >
-      {props.name || props.cmd}
-    </button>
-  );
 }
 
 export default EditDocument;
