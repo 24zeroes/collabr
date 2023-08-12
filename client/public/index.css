@@ -42,6 +42,17 @@ body {
   border-radius: 8px;
 }
 
+@media all and (max-width: 1440px) {
+  .documentContent {
+    width: 100%;
+  }
+
+  .documentForm {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+}
+
 .styleBar {
   position: sticky;
   top: 2vh;
